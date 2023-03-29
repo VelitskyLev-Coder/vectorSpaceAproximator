@@ -1,3 +1,6 @@
+
+
+
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, Union, Callable, Any
 from math import sqrt
@@ -71,8 +74,8 @@ class FiniteVectorSpace:
     def get_best_approximation(self, vec: IVector) -> (IVector, float):
         zero_vec = self.get_zero_vector()
         orthonormal_base = self.get_orthonormal_base()
-        w_star = sum([self.VEC_CLASS.inner(vec, a)*a for a in orthonormal_base], zero_vec)
-        min_dist = (vec-w_star).norm()
+        w_star = sum([self.VEC_CLASS.inner(vec, a) * a for a in orthonormal_base], zero_vec)
+        min_dist = (vec - w_star).norm()
         return w_star, min_dist
 
 
@@ -111,36 +114,30 @@ class SymbolicFunction(IVector['SymbolicFunction']):
     @staticmethod
     def inner(first: 'SymbolicFunction', second: 'SymbolicFunction') -> float:
         # numerical integration, L2
-        result, _ = quad(sp.lambdify(first.ver, first.func*second.func, 'numpy'), 0, 1)
+        result, _ = quad(sp.lambdify(first.ver, first.func * second.func, 'numpy'), 0, 1)
         return result
 
 
 def main():
-    a = RNVec(-1, 3, 1, 1)
-    b = RNVec(6, -8, -2, -4)
-    c = RNVec(6, 3, 6, -3)
-    W = FiniteVectorSpace(a, b, c)
+    #a = RNVec(-1, 3, 1, 1)
+    #b = RNVec(6, -8, -2, -4)
+    #c = RNVec(6, 3, 6, -3)
+    #W = FiniteVectorSpace(a, b, c)
+    #aprox, error = W.get_best_approximation(RNVec(1, -1, 1, -2))
+    #print(aprox, error)
+
     x = sp.symbols('x')
     base = []
-    #for n in range(1, 33):
-    #    base.append(SymbolicFunction(sp.sin(2*sp.pi*sp.Integer(n)*x), x))
-    #    base.append(SymbolicFunction(sp.cos(2 * sp.pi * sp.Integer(n)*x), x))
     base.append(SymbolicFunction(sp.Integer(1), x))
-    for n in range(1, 15):
-        base.append(SymbolicFunction(x**n, x))
-        W = FiniteVectorSpace(*base)
-        w_star, min_dist = W.get_best_approximation(SymbolicFunction(sp.exp(sp.exp(x)*x*0.3), x))
-        print(str(w_star.func))
-        print('f(x) = ' + sp.latex(w_star.func))
-        print(min_dist)
-        print('****************')
-    #base.append(SymbolicFunction(x, x))
+    for n in range(1, 4):
+        base.append(SymbolicFunction(sp.exp(-x**2*n), x))
+        #base.append(SymbolicFunction(sp.sin(2*sp.pi*n*x), x))
 
-    #W = FiniteVectorSpace(*base)
-    #w_star, min_dist = W.get_best_approximation(SymbolicFunction(sp.exp(sp.sin(sp.Number(10)*x)), x))
-    #print(str(w_star.func))
     #print('f(x) = ' + sp.latex(w_star.func))
-    #print(min_dist)
+    W = FiniteVectorSpace(*base)
+    w_star, min_dist = W.get_best_approximation(SymbolicFunction(-sp.ln(x+1), x))
+    print('f(x) = ' + sp.latex(w_star.func))
+    print(min_dist)
 
 if __name__ == '__main__':
     main()
