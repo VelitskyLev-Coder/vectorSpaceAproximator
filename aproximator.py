@@ -1,6 +1,3 @@
-
-
-
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, Union, Callable, Any
 from math import sqrt
@@ -63,9 +60,10 @@ class FiniteVectorSpace:
         orthonormal_base.append(self.base[0].get_normalized())
         zero_vec = self.get_zero_vector()
         for i, b_vec in enumerate(self.base[1:], start=1):
-            orthonormal_base.append(
-                (b_vec - sum([self.VEC_CLASS.inner(b_vec, a) * a for a in orthonormal_base],
-                             zero_vec)).get_normalized())
+            projection = sum([self.VEC_CLASS.inner(b_vec, a) * a for a in orthonormal_base],
+                             zero_vec)
+            new_base_vector = b_vec - projection
+            orthonormal_base.append(new_base_vector.get_normalized())
         return orthonormal_base
 
     def get_zero_vector(self):
@@ -124,18 +122,17 @@ def main():
     #c = RNVec(6, 3, 6, -3)
     #W = FiniteVectorSpace(a, b, c)
     #aprox, error = W.get_best_approximation(RNVec(1, -1, 1, -2))
-    #print(aprox, error)
+    #print(f'w_star = {aprox}\n')
+    #print(f'error = {error}')
 
     x = sp.symbols('x')
     base = []
     base.append(SymbolicFunction(sp.Integer(1), x))
-    for n in range(1, 4):
-        base.append(SymbolicFunction(sp.exp(-x**2*n), x))
-        #base.append(SymbolicFunction(sp.sin(2*sp.pi*n*x), x))
+    for n in range(1, 5):
+        base.append(SymbolicFunction(x**n, x))
 
-    #print('f(x) = ' + sp.latex(w_star.func))
     W = FiniteVectorSpace(*base)
-    w_star, min_dist = W.get_best_approximation(SymbolicFunction(-sp.ln(x+1), x))
+    w_star, min_dist = W.get_best_approximation(SymbolicFunction(sp.erf(x), x))
     print('f(x) = ' + sp.latex(w_star.func))
     print(min_dist)
 
